@@ -10,7 +10,8 @@ Stack: [Nuxt 4](https://nuxt.com) · [Nuxt Content](https://content.nuxt.com) (t
 
 ## Requisiti
 
-- Node.js ≥ 22.5 (vedi `.nvmrc`), solo per sviluppare e generare il sito
+- Node.js 26 (vedi `.nvmrc`; `engines` in `package.json` lo fissa anche per le build su Vercel), solo per
+  sviluppare e generare il sito
 
 ## Comandi
 
@@ -20,12 +21,15 @@ npm run dev        # sviluppo su http://localhost:8080
 npm run generate   # genera il sito statico in .output/public
 npm run preview    # prova in locale il sito generato
 npm run typecheck  # controllo dei tipi
+npm run format:check  # controlla la formattazione (Prettier)
 ```
 
 Variabili d'ambiente:
 
 - `NUXT_PUBLIC_SITE_URL` (default `https://fulcrongrv.it`): usata per sitemap, link canonici e Open Graph.
-- `NUXT_PUBLIC_GALLERY_URL` (default `/foto`, per lo sviluppo in locale): da dove arrivano le foto della gallery.
+- `NUXT_PUBLIC_GALLERY_URL`: da dove arrivano le foto della gallery. Se non è impostata si usa `/foto` quando
+  `public/foto/` contiene le foto generate da `npm run gallery`, altrimenti il bucket di produzione
+  `https://foto.fulcrongrv.it`. Così un clone appena fatto si genera senza passaggi in più.
 
 ## Contenuti
 
@@ -58,9 +62,12 @@ In produzione le foto della gallery non sono nel repo né su Vercel: stanno in u
 `https://foto.fulcrongrv.it` (custom domain del bucket). Il bucket contiene la stessa struttura di `public/foto/`,
 cioè `<album>/thumb/` e `<album>/large/`.
 
-Su Vercel `NUXT_PUBLIC_GALLERY_URL=https://foto.fulcrongrv.it` deve essere impostata sia per Production sia per
-Preview. Senza questa variabile la build fallisce: le copertine puntano a `/foto`, che su Vercel non esiste. La
-variabile vale solo per le build successive, quindi dopo averla cambiata serve un nuovo deploy.
+Su Vercel `public/foto/` non esiste, quindi la build usa già `https://foto.fulcrongrv.it`. Impostare comunque
+`NUXT_PUBLIC_GALLERY_URL=https://foto.fulcrongrv.it` per Production e Preview rende la scelta esplicita; la variabile
+vale solo per le build successive, quindi dopo averla cambiata serve un nuovo deploy.
+
+In locale, se `public/foto/` è solo parziale (alcuni album sì e altri no), la build fallisce sulle foto mancanti:
+rigenerala con `npm run gallery` oppure imposta `NUXT_PUBLIC_GALLERY_URL=https://foto.fulcrongrv.it`.
 
 Per caricare le foto serve [rclone](https://rclone.org), configurato con un remote `r2` di tipo S3 (provider
 Cloudflare), un token R2 con permesso `Object Read & Write` sul solo bucket e l'endpoint
@@ -95,6 +102,8 @@ Poi fai il commit dei JSON in `content/gallery/` e il deploy del sito.
 - `vercel.json` dichiara le route a mano: il preset Nuxt di Vercel manda ogni indirizzo sconosciuto a `200.html`, che
   risponde 200, mentre così le pagine inesistenti danno un vero 404. `framework: null` non basta, perché Vercel rileva
   comunque Nuxt da `package.json`.
+- `vercel.json` aggiunge anche alcuni header di sicurezza su tutte le pagine e la cache: un anno per `/_nuxt/` (file
+  con hash nel nome), un giorno per le immagini di `/_ipx/` (il loro indirizzo non cambia se cambia l'immagine).
 - I vecchi indirizzi `/who` e `/sinfonia` reindirizzano alle nuove pagine.
 - La wiki, prima su `wikia.fulcrongrv.it`, ora è una sezione del sito (`/wiki`). Se il vecchio sottodominio è ancora
   attivo, conviene reindirizzarlo a `https://fulcrongrv.it/wiki`.

@@ -205,7 +205,11 @@ html.sd-dark:not(.sd-lighting) .sd-lamp__bulb {
 /* The bulb catches on the second try, then the room fills with light from it */
 html.sd-lighting .sd-blackout {
   animation: sd-light-on 1.9s linear forwards;
-  mask-image: radial-gradient(circle at var(--sd-x, 50%) var(--sd-y, 25%), transparent calc(var(--sd-r) * 0.55), #000 var(--sd-r));
+  mask-image: radial-gradient(
+    circle at var(--sd-x, 50%) var(--sd-y, 25%),
+    transparent calc(var(--sd-r) * 0.55),
+    #000 var(--sd-r)
+  );
 }
 
 html.sd-lighting .sd-lamp__bulb {

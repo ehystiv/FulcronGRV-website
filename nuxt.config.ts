@@ -1,7 +1,13 @@
+import { existsSync, readdirSync } from 'node:fs'
 import tailwindcss from '@tailwindcss/vite'
 
 // https://nuxt.com/docs/api/configuration/nuxt-config
 const siteUrl = process.env.NUXT_PUBLIC_SITE_URL || 'https://fulcrongrv.it'
+
+// Gallery photos: public/foto when `npm run gallery` has filled it, otherwise the production bucket on R2.
+// A fresh clone (or a Vercel build without NUXT_PUBLIC_GALLERY_URL) still builds and shows the real photos.
+const hasLocalPhotos = existsSync('public/foto') && readdirSync('public/foto').length > 0
+const galleryUrl = process.env.NUXT_PUBLIC_GALLERY_URL || (hasLocalPhotos ? '/foto' : 'https://foto.fulcrongrv.it')
 const description =
   'FulcronGRV è un’associazione di gioco di ruolo dal vivo (LARP) dell’Appennino Tosco-Emiliano: la campagna fantasy “La Sinfonia dei Sette”, oneshot e molto altro.'
 
@@ -61,9 +67,7 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       siteUrl,
-      // Where the gallery photos are served from: public/foto locally, external storage in
-      // production (NUXT_PUBLIC_GALLERY_URL)
-      galleryUrl: process.env.NUXT_PUBLIC_GALLERY_URL || '/foto',
+      galleryUrl,
     },
   },
 
